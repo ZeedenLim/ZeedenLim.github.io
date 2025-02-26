@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Opening Scene</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #F0F0F0;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            overflow: hidden;
+        }
+
+        #container {
+            position: relative;
+            width: 960px;
+            height: 540px;
+            overflow: hidden;
+        }
+
+        #image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            animation: fadeIn 1.5s ease-in-out forwards;
+        }   
+
+        .character {
+            position: absolute;
+            width: 240px;
+            height: auto;
+            bottom: -300px;
+            left: 13%;
+            transform: translateX(-50%);
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        @font-face {
+            font-family: 'Pokemon Pixel Font';
+            src: url('Pokemon_Pixel_Font/pokemon_pixel_font.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        #textbox, #namebox {
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        #textbox {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 115px;
+            background: rgba(255, 255, 255, 0.747);
+            border: 4px solid rgba(83, 223, 251, 0.793);
+            padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: left;
+            font-family: 'Pokemon Pixel Font', sans-serif;
+            font-size: 35px;
+            z-index: 20;
+        }
+
+        #namebox {
+            position: absolute;
+            bottom: 120px;
+            left: 20px;
+            width: 250px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.774);
+            border: 4px solid rgba(83, 223, 251, 0.793);
+            padding: 5px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Pokemon Pixel Font', sans-serif;
+            font-size: 35px;
+            z-index: 21;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { bottom: -300px; opacity: 0; }
+            to { bottom: 115px; opacity: 1; }
+        }
+
+        #screen-transition {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: black;
+            z-index: 100;
+        }
+
+        @keyframes leftToRight {
+            from { width: 0; }
+            to { width: 100%; }
+        }       
+
+        #end-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Pokemon Pixel Font', sans-serif;
+    font-size: 50px;
+    color: white;
+    opacity: 0; /* Hidden at first */
+    transition: opacity 1s ease-in-out;
+    z-index: 101; /* Above black screen */
+}
+
+    </style>
+</head>
+
+<body>
+
+    <div id="container">
+        <img id="image" src="Pixel Bedroom.png" alt="Background">
+        <img id="character1" class="character" src="Pokemon Red Main Character 2.png" alt="Red">
+        <img id="character2" class="character" src="Pikachu Model.png" alt="Pikachu">
+        <img id="character3" class="character" src="Pokemon News Reporter.png" alt="News Reporter">
+        <div id="namebox">Red</div>
+        <div id="textbox">Great work today, Pikachu. You did amazing!</div>
+        <div id="screen-transition"></div>
+        <div id="end-message">THANKS FOR PLAYING!</div>
+
+    </div>
+
+    <audio id="background-music" src="Pokemon Victory Music.mp4" autoplay loop></audio>
+
+    <script>
+        const dialogues = [
+            { name: "News Reporter", text: "Just in, the mad scientist that has controlled our beloved pokemon has been brought to justice.", character: "character3" },
+            { name: "News Reporter", text: "He has been turned into the police just this morning and is awaiting punishment.", character: "character3" },
+            { name: "News Reporter", text: "Of course, we have our reigning Pokemon champion trainer to thank for...", character: "character3" },
+            { name: "News Reporter", text: "...Red has saved the day once again!", character: "character3" },
+            { name: "Red", text: ":)", character: "character1" },
+            { name: "Pikachu", text: "Pika Pika!", character: "character2" }
+        ];
+
+        let currentDialogue = 0;
+        let activeCharacter = null;
+        const audio = document.getElementById("transition-sound");
+
+        function showDialogue() {
+            const namebox = document.getElementById("namebox");
+            const textbox = document.getElementById("textbox");
+
+            const { name, text, character } = dialogues[currentDialogue];
+
+            // Hide previous character
+            if (activeCharacter) {
+                activeCharacter.style.opacity = "0";
+                activeCharacter.style.animation = ""; // Reset animation
+            }
+
+            // Update namebox and textbox
+            if (character) {
+                activeCharacter = document.getElementById(character);
+                if (activeCharacter) {
+                    activeCharacter.style.opacity = "1";
+                    activeCharacter.style.animation = "slideUp 1s ease-out forwards";
+                }
+                namebox.style.opacity = "1";
+                namebox.innerText = name;
+            } else {
+                activeCharacter = null;
+                namebox.style.opacity = "0";
+            }
+
+            textbox.innerText = text;
+            textbox.style.opacity = "1";
+        }
+
+        // Advance dialogue on click
+        document.getElementById("container").addEventListener("click", () => {
+            currentDialogue++;
+
+            if (currentDialogue < dialogues.length) {
+                showDialogue();
+            } else {
+                // Start transition animation
+                const transitionScreen = document.getElementById("screen-transition");
+                transitionScreen.style.animation = "leftToRight 2.5s forwards";
+
+                setTimeout(() => {
+    document.getElementById("end-message").style.opacity = "1"; // Show text
+}, 2500); // Delays message until transition completes
+
+
+                setTimeout(function() {
+                    let fadeSpeed = 100;
+                    let fadeStep = 0.08;
+                    let fadeInterval = setInterval(function() {
+                        if (audio.volume > fadeStep) {
+                            audio.volume -= fadeStep;
+                        } else {
+                            audio.volume = 0;
+                            clearInterval(fadeInterval);
+                            audio.pause();
+                        }
+                    }, fadeSpeed);
+                }, 1000);
+            }
+        });
+
+        // Initial trigger after background fades in
+        setTimeout(showDialogue, 2500);
+    </script>
+
+</body>
+</html>

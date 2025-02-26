@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pokémon Scene</title>
+
+<style>
+body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #F0F0F0;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    overflow: hidden;
+}
+
+#container {
+    position: relative;
+    width: 960px;
+    height: 540px;
+    overflow: hidden;
+}
+
+#image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    animation: fadeIn 1.5s ease-in-out forwards;
+}
+
+.character {
+    position: absolute;
+    width: 240px;
+    height: auto;
+    bottom: 115px;
+    left: 13%;
+    transform: translateX(-50%);
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out, bottom 0.5s ease-in-out;
+}
+
+.background-character {
+    position: absolute;
+    width: 240px;
+    height: auto;
+    bottom: 115px;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    z-index: 5;
+    transition: transform 1.5s ease-out, opacity 1.5s ease-out;
+}
+
+#character3_bg {
+    position: absolute;
+    width: 240px;
+    height: auto;
+    bottom: 115px;
+    transform: translateX(-50%) scale(1) scaleX(-1);
+    opacity: 0;
+    z-index: 5;
+    transition: transform 1.5s ease-out, opacity 1.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@font-face {
+    font-family: 'Pokemon Pixel Font';
+    src: url('Pokemon_Pixel_Font/pokemon_pixel_font.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+#textbox, #namebox {
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+#textbox {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 115px;
+    background: rgba(255, 255, 255, 0.747);
+    border: 4px solid rgba(83, 223, 251, 0.793);
+    padding: 10px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    font-family: 'Pokemon Pixel Font', sans-serif;
+    font-size: 35px;
+    z-index: 20;
+}
+
+#namebox {
+    position: absolute;
+    bottom: 120px;
+    left: 20px;
+    width: 250px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.774);
+    border: 4px solid rgba(83, 223, 251, 0.793);
+    padding: 5px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Pokemon Pixel Font', sans-serif;
+    font-size: 35px;
+    z-index: 21;
+}
+
+/* Fade to black transition */
+#fade-to-black {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    z-index: 100;
+    transition: left 1.5s ease-in-out;
+}
+</style>
+</head>
+
+<body>
+<div id="container">
+    <img id="image" src="Pokemon Final Boss Battle Background.png" alt="Background">
+    <img id="character1" class="character" src="Pokemon Red Main Character 2.png" alt="Red">
+    <img id="character2" class="character" src="Pikachu Model.png" alt="Pikachu">
+    <img id="character3" class="character" src="Pokemon Evil Scientist.png" alt="Evil Scientist 1">
+    <img id="character4" class="character" src="Genesect Pokemon.png" alt="Genesect">
+    <img id="character2_bg" class="background-character" src="Pikachu Model.png" alt="Pikachu (Background)">
+    <img id="character3_bg" class="background-character" src="Pokemon Evil Scientist Full Body.png" alt="Evil Scientist 2">
+    <img id="character4_bg" class="background-character" src="Genesect Pokemon.png" alt="Genesect (Background)">
+    <div id="namebox">Red</div>
+    <div id="textbox">Great work today, Pikachu. You did amazing!</div>
+
+    <!-- Fade to black transition element -->
+    <div id="fade-to-black"></div>
+</div>
+
+<audio id="background-music" src="Pokemon Final Boss Music.mp4" autoplay loop></audio>
+
+<script>
+    let audio = document.getElementById("background-music");
+    audio.volume = 0.3; // Start at a lower volume
+    audio.play();
+
+    let currentDialogue = 0;
+    let activeCharacter = null;
+
+    const dialogues = [
+        { text: "Genesect starts to malfucntion, it's Generative AI programming getting overwhelmed..."},
+        { name: "Red", text: "Now's your chance, Pikachu, Thunderbolt!", character: "character1"},
+        { name: "Pikachu", text: "Pika!", character: "character2" },
+        { name: "Genesect", text: "BZZT* BZZT*", character: "character4" },
+        { text: "Genesect faints..."},
+        { name: "Evil Scientist", text: "WHAT?! NOOO!", character: "character3" },
+        { name: "Evil Scientist", text: "This wouldn't be the last you seen of me!", character: "character3" },
+        { name: "Red", text: "Where do you think you're going?", character: "character1" },
+        { name: "Evil Scientist", text: "Uhhhh...", character: "character3" },
+    ];
+
+    function showDialogue() {
+        const namebox = document.getElementById("namebox");
+        const textbox = document.getElementById("textbox");
+
+        const currentDialog = dialogues[currentDialogue];
+        const { name, text, character } = currentDialog;
+
+        // Hide previous character properly
+        if (activeCharacter) {
+            activeCharacter.style.opacity = "0";
+            activeCharacter.style.bottom = "50px"; // Move character slightly down instead of disappearing
+        }
+
+        if (character) {
+            activeCharacter = document.getElementById(character);
+            if (activeCharacter) {
+                activeCharacter.style.opacity = "1";
+                activeCharacter.style.bottom = "115px"; // Move into view
+            }
+            namebox.style.opacity = "1";
+            namebox.innerText = name;
+        } else {
+            activeCharacter = null;
+            namebox.style.opacity = "0";
+        }
+
+        textbox.innerText = text;
+        textbox.style.opacity = "1";
+    }
+
+    // Handle click events on the container
+    document.getElementById("container").addEventListener("click", () => {
+        if (currentDialogue < dialogues.length - 1) {
+            currentDialogue++;
+            showDialogue();
+        } else {
+            // Fade audio
+            setTimeout(function() {
+                let fadeSpeed = 100; // Adjust fade speed in milliseconds
+                let fadeStep = 0.05; // Increase the decrement value for a quicker fade
+                let fadeInterval = setInterval(function() {
+                    if (audio.volume > fadeStep) {
+                        audio.volume -= fadeStep;
+                    } else {
+                        audio.volume = 0;
+                        clearInterval(fadeInterval);
+                        audio.pause(); // Stop the audio completely
+                    }
+                }, fadeSpeed);
+            }, 1000);
+
+            // Start fade to black transition
+            setTimeout(() => {
+                const fadeToBlack = document.getElementById("fade-to-black");
+                fadeToBlack.style.left = "0"; // Slide in from left to right
+                
+                // After transition completes, redirect
+                setTimeout(function() {
+                    window.location.href = "GEN AI Website 7.html";
+                }, 1500);
+            }, 2000);
+        }
+    });
+
+    // Start the scene
+    setTimeout(showDialogue, 2000);
+</script>
+</body>
+</html>

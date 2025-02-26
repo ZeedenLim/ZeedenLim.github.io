@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pokemon AI Outbreak</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #F0F0F0;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #overlay {
+            background: rgba(0, 0, 0, 0.6);
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            top: -100vh;
+        }
+
+        #overlay div {
+            text-align: center;
+            color: whitesmoke;
+        }
+
+        frame {
+            width: 960px;
+            height: 540px;
+            aspect-ratio: 16/9;
+            border: none;
+            background-color: aliceblue;
+            overflow: hidden;
+        }
+
+        /* Mobile responsiveness */
+        @media only screen and (min-device-width: 375px) and (orientation: portrait) {
+            #overlay {
+                top: 0;
+            }
+        }
+
+        @media only screen and (max-width: 767px) and (orientation: landscape) {
+            #container {
+                transform: scale(0.6);
+            }
+        }
+
+        /* Center the container */
+#container {
+    position: relative; /* Allows absolute positioning for child elements */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Full height of the screen */
+    text-align: center;
+}
+
+/* Style the image */
+#image {
+    width: 960px;
+    height: 540px;
+    object-fit: cover;
+    transition: transform 3s ease-in-out;
+        }
+
+/* Import custom font */
+@font-face {
+    font-family: 'Pokemon Pixel Font';
+    src: url('Pokemon_Pixel_Font/pokemon_pixel_font.ttf') format('truetype'); /* Adjust path if needed */
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Heading */
+#container h1 {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Pokemon Pixel Font';
+            color: white;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 20px 40px;
+            border-radius: 20px;
+            font-size: 48px;
+            transition: opacity 1.5s ease-out;
+        }
+
+        /* Button styling */
+        #start-button {
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #ff9800;
+            color: white;
+            font-size: 48px;
+            font-family: 'Pokemon Pixel Font';
+            padding: 24px 36px;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: background 0.3s ease, opacity 1.5s ease-out;
+        }
+
+        #start-button:hover {
+            background: #ba7204;
+        }
+
+        /* Fade out effect */
+        .fade-out {
+            opacity: 0;
+            pointer-events: none; /* Prevent interaction after fade */
+        }
+
+        /* Zoom effect */
+        .zoom-effect {
+            transform: scale(12) translate(-25%, -8%); /* Adjust to zoom into the desired area */
+        }
+
+        /* Full-screen fade to black */
+        #fade-out {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: black;
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+            pointer-events: none;
+            z-index: 999; /* Ensures it covers everything */
+        }
+
+        .fade-in-black {
+            opacity: 1 !important;
+        }
+    </style>
+
+
+</head>
+
+<body>
+    <div id="overlay">
+        <div>
+            <svg fill="#ffffff" width="150" height="150" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 214.367 214.367" xml:space="preserve">
+                <path d="M202.403,95.22c0,46.312-33.237,85.002-77.109,93.484v25.663l-69.76-40l69.76-40v23.494
+                    c27.176-7.87,47.109-32.964,47.109-62.642c0-35.962-29.258-65.22-65.22-65.22s-65.22,29.258-65.22,65.22
+                    c0,9.686,2.068,19.001,6.148,27.688l-27.154,12.754c-5.968-12.707-8.994-26.313-8.994-40.441C11.964,42.716,54.68,0,107.184,0
+                    S202.403,42.716,202.403,95.22z"></path>
+            </svg>
+            <h1>Please rotate your screen</h1>
+        </div>
+    </div>
+
+    <div id="container">
+        <h1 id="title">The Outbreak of AI Pokemon</h1>
+        <img id="image" src="Pokemon House.webp">
+        <button id="start-button">Start</button>
+    </div>
+
+
+    <div id="fade-out"></div>
+
+    <audio id="background-music" src="DDLC OST 1.mp4" autoplay loop></audio>
+
+    <script>
+        document.getElementById("start-button").addEventListener("click", function() {
+            let audio = document.getElementById("background-music");
+            audio.volume = 1.0; // Start at full volume
+            audio.play();
+
+            // Step 1: Fade out text and button
+            document.getElementById("title").classList.add("fade-out");
+            this.classList.add("fade-out");
+
+            // Step 2: Zoom into the image after a delay (2 seconds)
+            setTimeout(function() {
+                document.getElementById("image").classList.add("zoom-effect");
+            }, 2000);
+
+            // Step 3: Start fading audio quickly just before the screen fades to black (4s)
+    setTimeout(function() {
+        let fadeSpeed = 100; // Adjust fade speed in milliseconds
+        let fadeStep = 0.08; // Increase the decrement value for a quicker fade
+        let fadeInterval = setInterval(function() {
+            if (audio.volume > fadeStep) {
+                audio.volume -= fadeStep; // Reduce volume more aggressively
+            } else {
+                audio.volume = 0;
+                clearInterval(fadeInterval);
+                audio.pause(); // Stop the audio completely
+            }
+        }, fadeSpeed); // Adjust speed of fade effect (lower = faster)
+    }, 4000); // Start fading audio 1s before the screen fade
+
+            // Step 4: Fade to black after the zoom effect (5 seconds total delay)
+            setTimeout(function() {
+            document.getElementById("fade-out").classList.add("fade-in-black");
+            }, 5000);
+
+            // Step 5: Redirect after fade-to-black (7 seconds total delay)
+            setTimeout(function() {
+                window.location.href = "GEN AI Website 2.html"; // Change this to your next page URL
+            }, 7000);
+        });
+    </script>
+</body>
+</html>
+    </div>
+
+</body>
+</html>

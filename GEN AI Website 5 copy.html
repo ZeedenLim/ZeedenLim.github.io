@@ -1,0 +1,967 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pokémon Quiz Battle</title>
+
+<style>
+body {
+margin: 0;
+padding: 0;
+width: 100vw;
+height: 100vh;
+display: flex;
+justify-content: center;
+align-items: center;
+background: #F0F0F0;
+font-family: Verdana, Geneva, Tahoma, sans-serif;
+overflow: hidden;
+}
+
+#container {
+position: relative;
+width: 960px;
+height: 540px;
+overflow: hidden; /* Prevents characters from appearing outside */
+}
+
+#image {
+width: 100%;
+height: 100%;
+object-fit: cover;
+opacity: 0;
+animation: fadeIn 1.5s ease-in-out forwards;
+}
+
+.character {
+position: absolute;
+width: 240px;
+height: auto;
+bottom: 115px; /* This ensures they are in view when shown */
+left: 13%;
+transform: translateX(-50%);
+z-index: 10;
+opacity: 0;
+transition: opacity 0.5s ease-in-out, bottom 0.5s ease-in-out;
+}
+
+.background-character {
+position: absolute;
+width: 240px;
+height: auto;
+bottom: 115px;
+left: 50%; /* Center it by default */
+transform: translateX(-50%);
+opacity: 0;
+z-index: 5;
+transition: transform 1.5s ease-out, opacity 1.5s ease-out;
+}
+
+#character3_bg {
+position: absolute;
+width: 240px;
+height: auto;
+bottom: 115px;
+/* Pre-flip Rotom so he faces right */
+transform: translateX(-50%) scale(1) scaleX(-1);
+opacity: 0;
+z-index: 5;
+transition: transform 1.5s ease-out, opacity 1.5s ease-out;
+}
+
+@keyframes fadeIn {
+from { opacity: 0; }
+to { opacity: 1; }
+}
+
+@keyframes slideUp {
+from { transform: translateY(100px); opacity: 0; }
+to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeInMove {
+0% { opacity: 0; transform: translateY(20px); }
+100% { opacity: 1; transform: translateY(0); }
+}
+
+@font-face {
+font-family: 'Pokemon Pixel Font';
+src: url('Pokemon_Pixel_Font/pokemon_pixel_font.ttf') format('truetype');
+font-weight: normal;
+font-style: normal;
+}
+
+#textbox, #namebox {
+opacity: 0;
+transition: opacity 0.5s ease-in-out;
+}
+
+#textbox {
+position: absolute;
+bottom: 0;
+width: 100%;
+height: 115px;
+background: rgba(255, 255, 255, 0.747);
+border: 4px solid rgba(83, 223, 251, 0.793);
+padding: 10px;
+box-sizing: border-box;
+display: flex;
+align-items: center;
+justify-content: left;
+font-family: 'Pokemon Pixel Font', sans-serif;
+font-size: 35px;
+z-index: 20;
+}
+
+#namebox {
+position: absolute;
+bottom: 120px;
+left: 20px;
+width: 250px;
+height: 50px;
+background: rgba(255, 255, 255, 0.774);
+border: 4px solid rgba(83, 223, 251, 0.793);
+padding: 5px;
+box-sizing: border-box;
+display: flex;
+align-items: center;
+justify-content: center;
+font-family: 'Pokemon Pixel Font', sans-serif;
+font-size: 35px;
+z-index: 21;
+}
+
+/* New styles for health bars and name boxes */
+.health-bar-container {
+position: absolute;
+width: 200px;
+height: 20px;
+background: rgba(0, 0, 0, 0.5);
+border: 2px solid #000;
+border-radius: 5px;
+overflow: hidden;
+z-index: 22;
+}
+
+.health-bar {
+height: 100%;
+background: #00FF00;
+width: 100%;
+transition: width 0.5s ease-in-out;
+}
+
+.name-box {
+position: absolute;
+width: 150px;
+height: 30px;
+background: rgba(255, 255, 255, 0.774);
+border: 2px solid rgba(83, 223, 251, 0.793);
+padding: 5px;
+box-sizing: border-box;
+display: flex;
+align-items: center;
+justify-content: center;
+font-family: 'Pokemon Pixel Font', sans-serif;
+font-size: 20px;
+z-index: 23;
+}
+
+/* Hide health bars and name boxes initially */
+.health-bar-container, .name-box {
+opacity: 0;
+transition: opacity 1s ease-in-out;
+}
+
+#pikachu-health-container {
+bottom: 100px;
+left: 20px;
+}
+
+#rotom-health-container {
+top: 50px; /* Move below the name box */
+right: 20px;
+}
+
+#pikachu-name-box {
+bottom: 130px;
+left: 20px;
+}
+
+#rotom-name-box {
+top: 13px; /* Move above the health bar */
+right: 20px;
+}
+
+/* Question box - new element for the quiz */
+#question-box {
+position: absolute;
+top: 20px;
+left: 20px;
+width: 550px;
+background: rgba(255, 255, 255, 0.85);
+border: 4px solid rgba(83, 223, 251, 0.793);
+border-radius: 8px;
+padding: 12px;
+box-sizing: border-box;
+font-family: 'Pokemon Pixel Font', sans-serif;
+font-size: 25px;
+z-index: 25;
+opacity: 0;
+transition: opacity 0.8s ease-in-out;
+}
+
+/* Move selection box styles - Adjusted for answer choices */
+#move-selection {
+position: absolute;
+bottom: 20px;
+right: 20px;
+width: 550px; /* Wider for answers */
+height: 270px; /* Taller for answers */
+background: rgba(255, 255, 255, 0.85);
+border: 4px solid rgba(83, 223, 251, 0.793);
+box-sizing: border-box;
+z-index: 24;
+display: grid;
+grid-template-columns: 1fr;
+grid-template-rows: repeat(4, 1fr);
+gap: 8px;
+padding: 8px;
+opacity: 0;
+transition: opacity 0.8s ease-in-out;
+border-radius: 8px;
+}
+
+.move-box {
+background: rgba(245, 245, 245, 0.9);
+border: 3px solid;
+border-radius: 6px;
+display: flex;
+align-items: center;
+padding: 0 12px;
+font-family: 'Pokemon Pixel Font', sans-serif;
+font-size: 18px;
+cursor: pointer;
+transition: all 0.2s ease;
+position: relative;
+opacity: 0;
+transform: translateY(20px);
+animation: fadeInMove 0.5s ease-in-out forwards;
+color: white;
+text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+pointer-events: auto; /* Ensure click events work */
+}
+
+/* Different colors for each move box */
+.move-box:nth-child(1) {
+animation-delay: 0.2s; 
+background: rgba(235, 83, 83, 0.85); /* Red */
+border-color: rgba(180, 40, 40, 0.9);
+}
+
+.move-box:nth-child(2) {
+animation-delay: 0.4s;
+background: rgba(255, 165, 0, 0.85); /* Orange */
+border-color: rgba(204, 132, 0, 0.9);
+}
+
+.move-box:nth-child(3) {
+animation-delay: 0.6s;
+background: rgba(66, 135, 245, 0.85); /* Blue */
+border-color: rgba(27, 84, 178, 0.9);
+}
+
+.move-box:nth-child(4) {
+animation-delay: 0.8s;
+background: rgba(46, 204, 113, 0.85); /* Green */
+border-color: rgba(39, 174, 96, 0.9);
+}
+
+.move-box:hover {
+filter: brightness(1.1);
+transform: scale(1.03);
+}
+
+.move-box.selected {
+filter: brightness(1.2);
+box-shadow: 0 0 10px 2px rgba(255, 255, 0, 0.5);
+}
+
+/* Option letter styling */
+.option-letter {
+font-weight: bold;
+margin-right: 8px;
+}
+
+/* Result message styling */
+#result-message {
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+background: rgba(0, 0, 0, 0.8);
+color: white;
+padding: 20px 40px;
+border-radius: 10px;
+font-family: 'Pokemon Pixel Font', sans-serif;
+font-size: 30px;
+z-index: 30;
+text-align: center;
+opacity: 0;
+transition: opacity 0.5s ease-in-out;
+}
+
+.correct {
+color: #00FF00;
+}
+
+.incorrect {
+color: #FF0000;
+}
+
+/* Battle dialogue overlay */
+#battle-dialogue {
+position: absolute;
+bottom: 0;
+width: 100%;
+height: 115px;
+background: rgba(255, 255, 255, 0.85);
+border: 4px solid rgba(83, 223, 251, 0.793);
+padding: 10px;
+box-sizing: border-box;
+display: flex;
+align-items: center;
+justify-content: left;
+font-family: 'Pokemon Pixel Font', sans-serif;
+font-size: 35px;
+z-index: 26;
+opacity: 0;
+transition: opacity 0.5s ease-in-out;
+}
+
+#battle-namebox {
+position: absolute;
+bottom: 120px;
+left: 20px;
+width: 250px;
+height: 50px;
+background: rgba(255, 255, 255, 0.85);
+border: 4px solid rgba(83, 223, 251, 0.793);
+padding: 5px;
+box-sizing: border-box;
+display: flex;
+align-items: center;
+justify-content: center;
+font-family: 'Pokemon Pixel Font', sans-serif;
+font-size: 35px;
+z-index: 27;
+opacity: 0;
+transition: opacity 0.5s ease-in-out;
+}
+
+/* Fade to black transition */
+#fade-to-black {
+position: absolute;
+top: 0;
+left: -100%; /* Start off-screen to the left */
+width: 100%;
+height: 100%;
+background: #000;
+z-index: 100;
+transition: left 1.5s ease-in-out;
+}
+</style>
+</head>
+
+<body>
+<div id="container">
+<img id="image" src="Pokemon Final Boss Battle Background.png" alt="Background">
+<img id="character1" class="character" src="Pokemon Red Main Character 2.png" alt="Red">
+<img id="character2" class="character" src="Pikachu Model.png" alt="Pikachu">
+<img id="character3" class="character" src="Pokemon Evil Scientist.png" alt="Evil Scientist 1">
+<img id="character4" class="character" src="Genesect Pokemon.png" alt="Genesect">
+<img id="character2_bg" class="background-character" src="Pikachu Model.png" alt="Pikachu (Background)">
+<img id="character3_bg" class="background-character" src="Pokemon Evil Scientist Full Body.png" alt="Evil Scientist 2">
+<img id="character4_bg" class="background-character" src="Genesect Pokemon.png" alt="Genesect (Background)">
+<div id="namebox">Red</div>
+<div id="textbox">Great work today, Pikachu. You did amazing!</div>
+
+<!-- Battle dialogue boxes -->
+<div id="battle-namebox"></div>
+<div id="battle-dialogue"></div>
+
+<!-- Health bars and name boxes -->
+<div id="pikachu-health-container" class="health-bar-container">
+<div id="pikachu-health-bar" class="health-bar"></div>
+</div>
+<div id="rotom-health-container" class="health-bar-container">
+<div id="rotom-health-bar" class="health-bar"></div>
+</div>
+<div id="pikachu-name-box" class="name-box">Pikachu</div>
+<div id="rotom-name-box" class="name-box">Genesect</div>
+
+<!-- Question box for quiz -->
+<div id="question-box">What can AI assistants like Claude do?</div>
+
+<!-- Move selection box - Now with answer choices -->
+<div id="move-selection">
+    <div class="move-box" data-correct="true">
+        <span class="option-letter">A)</span>
+        <span class="option-text">Write text, create images, and generate music</span>
+    </div>
+    <div class="move-box" data-correct="false">
+        <span class="option-letter">B)</span>
+        <span class="option-text">Only solve math problems</span>
+    </div>
+    <div class="move-box" data-correct="false">
+        <span class="option-letter">C)</span>
+        <span class="option-text">Store and organise files</span>
+    </div>
+    <div class="move-box" data-correct="false">
+        <span class="option-letter">D)</span>
+        <span class="option-text">Fix computer hardware</span>
+    </div>
+</div>
+
+<!-- Result message -->
+<div id="result-message"></div>
+
+<!-- Fade to black transition element -->
+<div id="fade-to-black"></div>
+</div>
+
+<audio id="background-music" src="Pokemon Final Boss Music.mp4" autoplay loop></audio>
+
+<script>
+let audio = document.getElementById("background-music");
+            audio.volume = 0.3; // Start at a lower volume
+            audio.play();
+
+const dialogues = [
+{ text: "Breaking into the Evil Scientist's lair, Red finds himself in a ominous looking room..."},
+{ text: "Then, a figure emerges from the shadows...", specialAction: "fadeInCharacter3"},
+{ name: "Evil Scientist", text: "Hehehe, so you did show up.", character: "character3" },
+{ name: "Red", text: "Someone had to stop you.", character: "character1"},
+{ name: "Red", text: "You can't just use Generative AI to control Pokemon however you want!", character: "character1"},
+{ name: "Evil Scientist", text: "Oh but I can...", character: "character3" },
+{ name: "Evil Scientist", text: "In fact...I perfected it!", character: "character3" },
+{ text: "A towering figure appears right behind the evil scientist...", specialAction: "fadeInCharacter4" },
+{ name: "Genesect", text: "Bzzt*", character: "character4" },
+{ name: "Red", text: "?!", character: "character1" },
+{ name: "Evil Scientist", text: "Beautiful isn't it? I have honed this very being to perfection!", character: "character3" },
+{ text: "Pikachu launches a thunderbolt towards Genesect..." },
+{ text: "But Genesect easily reflects it back at Pikachu..." },
+{ name: "Pikachu", text: "Pika!", character: "character2" },
+{ text: "Pikachu exclaims in pain*" },
+{ name: "Evil Scientist", text: "Tsk tsk tsk...", character: "character3" },
+{ name: "Evil Scientist", text: "Using Generative AI, your every move will be predicted...and punished.", character: "character3" },
+{ name: "Red", text: "Well...not if I outsmart it!", character: "character1" },
+];
+
+// Battle dialogues (can be added later)
+const battleDialogues = [
+    { name: "Evil Scientist", text: "Now then, if you truly think you can outsmart my Genesect...", character: "character3_bg" },
+    { name: "Evil Scientist", text: "Let's test your knowledge on Generative AI!", character: "character3_bg" },
+    { name: "Red", text: "Let's do this, Pikachu!", character: "character1" }
+];
+
+// Quiz data - Expanded to 10 questions
+const quizQuestions = [
+    {
+        question: "What does AI use to understand and generate text?",
+        answers: [
+            { text: "A large amount of data and patterns", correct: true },
+            { text: "A list of pre-written responses", correct: false },
+            { text: "A dictionary", correct: false },
+            { text: "A human translator", correct: false }
+        ]
+    },
+    {
+        question: "Which of these is NOT a use of AI?",
+        answers: [
+            { text: "Generating news articles", correct: false },
+            { text: "Cooking dinner", correct: true },
+            { text: "Creating realistic videos", correct: false },
+            { text: "Help diagnosing diseases", correct: false }
+        ]
+    },
+    {
+        question: "What kind of images can AI create?",
+        answers: [
+            { text: "Only realistic images", correct: false },
+            { text: "Only drawings", correct: false },
+            { text: "Any kind of image, both realistic and artistic", correct: true },
+            { text: "It cannot generate images", correct: false }
+        ]
+    },
+    {
+        question: "Which is an example of Generative AI?",
+        answers: [
+            { text: "A calculator solving math questions", correct: false },
+            { text: "AI creating a painting", correct: true },
+            { text: "A GPS giving directions", correct: false },
+            { text: "A search engine finding websites", correct: false }
+        ]
+    },
+    {
+        question: "Which of these is NOT typically a capability of modern AI?",
+        answers: [
+            { text: "Translating between languages", correct: false },
+            { text: "Summarizing long documents", correct: false },
+            { text: "Understanding emotions", correct: true },
+            { text: "Generating computer code", correct: false }
+        ]
+    },
+    {
+        question: "What does “machine learning” mean?",
+        answers: [
+            { text: "A machine reading a book", correct: false },
+            { text: "A computer learning from data", correct: true },
+            { text: "A human teaching a robot", correct: false },
+            { text: "A machine can't learn", correct: false }
+        ]
+    },
+    {
+        question: "Which of these is NOT a common concern about AI?",
+        answers: [
+            { text: "AI replacing jobs", correct: false },
+            { text: "AI generating fake content", correct: false },
+            { text: "AI becoming self-aware and taking over the world", correct: true },
+            { text: "AI making biased decisions", correct: false }
+        ]
+    },
+    {
+        question: "What is an AI chatbot?",
+        answers: [
+            { text: "A robot that physically talks to you", correct: false },
+            { text: "AI that talks to websites", correct: false },
+            { text: "A program that answers conversations and holds conversations", correct: true },
+            { text: "A tool for fixing computer bugs", correct: false }
+        ]
+    },
+    {
+        question: "What can Generative AI do?",
+        answers: [
+            { text: "Make a phone call", correct: false },
+            { text: "Write a story", correct: true },
+            { text: "Sort emails", correct: false },
+            { text: "Measure the temperature", correct: false }
+        ]
+    },
+    {
+        question: "What does 'GPT' in ChatGPT stand for?",
+        answers: [
+            { text: "Generative Pre-Trained Transformer", correct: true },
+            { text: "General Processing Technology", correct: false },
+            { text: "Graphic Predicition Tool", correct: false },
+            { text: "Graphic Processing Text", correct: false }
+        ]
+    }
+];
+
+let currentQuestion = 0;
+let currentDialogue = 0;
+let currentBattleDialogue = 0;
+let activeCharacter = null;
+let battleStarted = false;
+let battleDialogueComplete = false;
+let pikachuHealth = 100;
+let rotomHealth = 100; // Will be changed to larger amount later
+
+function showDialogue() {
+    const namebox = document.getElementById("namebox");
+    const textbox = document.getElementById("textbox");
+
+    const currentDialog = dialogues[currentDialogue];
+    const { name, text, character, specialAction } = currentDialog;
+
+    // Hide previous character properly
+    if (activeCharacter) {
+        activeCharacter.style.opacity = "0";
+        activeCharacter.style.bottom = "50px"; // Move character slightly down instead of disappearing
+    }
+
+    if (character) {
+        activeCharacter = document.getElementById(character);
+        if (activeCharacter) {
+            activeCharacter.style.opacity = "1";
+            activeCharacter.style.bottom = "115px"; // Move into view
+        }
+        namebox.style.opacity = "1";
+        namebox.innerText = name;
+    } else {
+        activeCharacter = null;
+        namebox.style.opacity = "0";
+    }
+
+    textbox.innerText = text;
+    textbox.style.opacity = "1";
+    
+    // Handle special actions for fading in background characters
+    if (specialAction) {
+        handleSpecialAction(specialAction);
+    }
+
+    if (currentDialogue === dialogues.length - 1) {
+        setTimeout(transitionToBattle, 2000);
+    }
+}
+
+function handleSpecialAction(action) {
+    if (action === "fadeInCharacter3") {
+        // Fade in Evil Scientist background character
+        const evilScientistBg = document.getElementById("character3_bg");
+        setTimeout(() => {
+            evilScientistBg.style.opacity = "0.9"; // Fade in but not fully opaque
+            evilScientistBg.style.left = "65%";    // Position on the right side
+            evilScientistBg.style.bottom = "250px";
+            evilScientistBg.style.transform = "translateX(-50%) scale(1.2) scaleX(-1)";
+        }, 1000); // Delay the fade-in for dramatic effect
+    } 
+    else if (action === "fadeInCharacter4") {
+        // Fade in Genesect background character
+        const genesectBg = document.getElementById("character4_bg");
+        setTimeout(() => {
+            genesectBg.style.opacity = "0.9"; // Fade in but not fully opaque
+            genesectBg.style.left = "85%";    // Position further to the right
+            genesectBg.style.bottom = "250px";
+            genesectBg.style.transform = "translateX(-50%) scale(1.1)";
+        }, 1000); // Delay the fade-in for dramatic effect
+    }
+}
+
+function transitionToBattle() {
+    if (battleStarted) return; // Prevent multiple transitions
+    battleStarted = true;
+
+    console.log("Transitioning to battle...");
+
+    const red = document.getElementById("character1");
+    const namebox = document.getElementById("namebox");
+    const textbox = document.getElementById("textbox");
+    const pikachu = document.getElementById("character2_bg");
+    const genesect = document.getElementById("character4_bg"); // Changed from rotom to genesect
+    const healthBars = document.querySelectorAll(".health-bar-container, .name-box");
+
+    // Hide dialogue elements
+    red.style.opacity = "0";
+    namebox.style.opacity = "0";
+    textbox.style.opacity = "0";
+
+    // Initialize Genesect's health to require 10 correct answers to defeat
+    rotomHealth = 100; // We'll keep the variable name but increase the amount needed
+
+    setTimeout(() => {
+        // Move Pikachu to bottom-left
+        pikachu.style.opacity = "1";
+        pikachu.style.left = "10%";
+        pikachu.style.bottom = "50px"; 
+        pikachu.style.transform = "scale(1.2)"; 
+
+        // Show health bars and name boxes
+        healthBars.forEach(bar => bar.style.opacity = "1");
+
+        // Start battle dialogue sequence after characters are positioned
+        setTimeout(showBattleDialogue, 1000);
+    }, 1000);
+}
+
+function showBattleDialogue() {
+    const battleNamebox = document.getElementById("battle-namebox");
+    const battleDialogueBox = document.getElementById("battle-dialogue");
+    
+    // Get current dialogue
+    const { name, text, character } = battleDialogues[currentBattleDialogue];
+    
+    // Hide previous character if any
+    if (activeCharacter) {
+        activeCharacter.style.opacity = "0";
+    }
+    
+    // Show the appropriate character
+    if (character) {
+        activeCharacter = document.getElementById(character);
+        if (activeCharacter) {
+            // Position the character appropriately based on who's speaking
+            if (character === "character1") {
+                // Position Red on the left side
+                activeCharacter.style.left = "15%";
+                activeCharacter.style.bottom = "115px";
+            } else if (character === "character3") {
+                // Position Evil Scientist
+                activeCharacter.style.left = "15%";
+                activeCharacter.style.bottom = "115px";
+            }
+            
+            activeCharacter.style.opacity = "1";
+        }
+    }
+    
+    // Set name and text
+    battleNamebox.textContent = name;
+    battleDialogueBox.textContent = text;
+    
+    // Show dialogue boxes
+    battleNamebox.style.opacity = "1";
+    battleDialogueBox.style.opacity = "1";
+    
+    // Enable click to continue
+    document.getElementById("container").addEventListener("click", advanceBattleDialogue);
+}
+
+function advanceBattleDialogue(e) {
+    // Don't advance if clicking on a move box
+    if (e.target.closest('.move-box')) return;
+    
+    // Remove this event listener
+    document.getElementById("container").removeEventListener("click", advanceBattleDialogue);
+    
+    currentBattleDialogue++;
+    
+    if (currentBattleDialogue < battleDialogues.length) {
+        // Show next dialogue
+        showBattleDialogue();
+    } else {
+        // All battle dialogues complete
+        const battleNamebox = document.getElementById("battle-namebox");
+        const battleDialogueBox = document.getElementById("battle-dialogue");
+        
+        // Hide battle dialogue boxes
+        battleNamebox.style.opacity = "0";
+        battleDialogueBox.style.opacity = "0";
+        
+        // Hide characters used in battle dialogue
+        if (activeCharacter) {
+            activeCharacter.style.opacity = "0";
+        }
+        
+        // Fade in Genesect's background model after battle dialogues are complete
+        const genesect = document.getElementById("character4_bg");
+        genesect.style.opacity = "1";
+        genesect.style.left = "75%"; 
+        genesect.style.top = "50px"; 
+        genesect.style.transform = "translateX(-50%) scale(1.2)"; 
+        
+        // Start the quiz after dialogue is hidden
+        setTimeout(() => {
+            battleDialogueComplete = true;
+            startQuiz();
+        }, 1000);
+    }
+}
+
+function startQuiz() {
+    const questionBox = document.getElementById("question-box");
+    const moveSelection = document.getElementById("move-selection");
+    
+    // Load the first question
+    loadQuestion(quizQuestions[currentQuestion]);
+    
+    // Show question and answer choices
+    questionBox.style.opacity = "1";
+    moveSelection.style.opacity = "1";
+}
+
+function loadQuestion(questionData) {
+    const questionBox = document.getElementById("question-box");
+    const moveBoxes = document.querySelectorAll(".move-box");
+    
+    // Set the question
+    questionBox.textContent = questionData.question;
+    
+    // Set the answer choices and attach event listeners directly
+    moveBoxes.forEach((box, index) => {
+        const letterSpan = box.querySelector(".option-letter");
+        const textSpan = box.querySelector(".option-text");
+        const answer = questionData.answers[index];
+        
+        letterSpan.textContent = String.fromCharCode(65 + index) + ")"; // A, B, C, D
+        textSpan.textContent = answer.text;
+        
+        box.setAttribute("data-correct", answer.correct.toString());
+        
+        // Clear existing event listeners by cloning and replacing
+        const newBox = box.cloneNode(true);
+        box.parentNode.replaceChild(newBox, box);
+        
+        // Add new event listener directly to the box
+        newBox.addEventListener("click", handleAnswerSelection);
+    });
+}
+
+function handleAnswerSelection(event) {
+    // Stop event from propagating to container
+    event.stopPropagation();
+    
+    const selectedBox = event.currentTarget;
+    const isCorrect = selectedBox.getAttribute("data-correct") === "true";
+    const resultMessage = document.getElementById("result-message");
+    
+    // Disable all move boxes
+    document.querySelectorAll(".move-box").forEach(box => {
+        box.style.pointerEvents = "none";
+    });
+    
+    // Highlight selected answer
+    selectedBox.classList.add("selected");
+    
+    if (isCorrect) {
+        // Correct answer - damage Genesect (10% per correct answer)
+        resultMessage.innerHTML = "<span class='correct'>Correct!</span><br>Pikachu's attack was super effective!";
+        rotomHealth -= 10; // Changed from 33.34 to 10 to require 10 correct answers
+        updateHealthBar("rotom-health-bar", rotomHealth);
+    } else {
+        // Wrong answer - damage Pikachu (33.34% per wrong answer - depletes in 3 hits)
+        resultMessage.innerHTML = "<span class='incorrect'>Incorrect!</span><br>Genesect countered with a powerful attack!";
+        pikachuHealth -= 33.34;
+        updateHealthBar("pikachu-health-bar", pikachuHealth);
+    }
+    
+    // Show result message
+    resultMessage.style.opacity = "1";
+    
+    // Check if battle is over
+    if (pikachuHealth <= 0 || rotomHealth <= 0) {
+        setTimeout(() => {
+            endBattle(pikachuHealth > rotomHealth);
+        }, 2000);
+    } else {
+        // Move to next question
+        setTimeout(() => {
+            resultMessage.style.opacity = "0";
+            currentQuestion++;
+            
+            // Check if we're out of questions, loop back to the first if needed
+            if (currentQuestion >= quizQuestions.length) {
+                currentQuestion = 0;
+            }
+            
+            loadQuestion(quizQuestions[currentQuestion]);
+            
+            // Re-enable move boxes
+            document.querySelectorAll(".move-box").forEach(box => {
+                box.classList.remove("selected");
+                box.style.pointerEvents = "auto";
+            });
+        }, 2000);
+    }
+}
+
+function updateHealthBar(barId, health) {
+    const healthBar = document.getElementById(barId);
+    const percentage = Math.max(0, health);
+    healthBar.style.width = percentage + "%";
+    
+    // Change color based on health remaining
+    if (percentage > 50) {
+        healthBar.style.background = "#00FF00"; // Green
+    } else if (percentage > 25) {
+        healthBar.style.background = "#FFFF00"; // Yellow
+    } else {
+        healthBar.style.background = "#FF0000"; // Red
+    }
+}
+
+function endBattle(playerWon) {
+    const resultMessage = document.getElementById("result-message");
+    const moveSelection = document.getElementById("move-selection");
+    const questionBox = document.getElementById("question-box");
+    
+    // Hide UI elements
+    moveSelection.style.opacity = "0";
+    questionBox.style.opacity = "0";
+    
+    if (playerWon) {
+        // Player won - Rotom's health is depleted
+        resultMessage.innerHTML = "You won the battle!<br>Genesect has malfunctioned!";
+        
+        // Show message for a few seconds before transition
+        resultMessage.style.opacity = "1";
+        
+        setTimeout(function() {
+        let fadeSpeed = 100; // Adjust fade speed in milliseconds
+        let fadeStep = 0.05; // Increase the decrement value for a quicker fade
+        let fadeInterval = setInterval(function() {
+            if (audio.volume > fadeStep) {
+                audio.volume -= fadeStep; // Reduce volume more aggressively
+            } else {
+                audio.volume = 0;
+                clearInterval(fadeInterval);
+                audio.pause(); // Stop the audio completely
+            }
+        }, fadeSpeed); // Adjust speed of fade effect (lower = faster)
+    }, 3500); // Start fading audio 1s before the screen fade
+
+
+        // After a delay, do the left-to-right fade to black transition
+        setTimeout(() => {
+            const fadeToBlack = document.getElementById("fade-to-black");
+            fadeToBlack.style.left = "0"; // Slide in from left to right
+            
+            // After transition completes, we could redirect or load new content
+                setTimeout(function() {
+                window.location.href = "GEN AI Website 6.html";
+            }, 1500);
+        }, 3000);
+    } else {
+        // Player lost - Pikachu's health is depleted
+        resultMessage.innerHTML = "You lost the battle!<br>Better luck next time.";
+        
+        // Show final result
+        resultMessage.style.opacity = "1";
+        
+        // Option to restart
+        setTimeout(() => {
+            resultMessage.innerHTML += "<br><br>Click anywhere to play again.";
+            document.getElementById("container").addEventListener("click", resetGame);
+        }, 3000);
+    }
+}
+
+function resetGame() {
+    // Remove the restart listener
+    document.getElementById("container").removeEventListener("click", resetGame);
+    
+    // Reset health bars
+    pikachuHealth = 100;
+    rotomHealth = 100;
+    updateHealthBar("pikachu-health-bar", pikachuHealth);
+    updateHealthBar("rotom-health-bar", rotomHealth);
+    
+    // Hide result message
+    document.getElementById("result-message").style.opacity = "0";
+    
+    // Hide any active character
+    if (activeCharacter) {
+        activeCharacter.style.opacity = "0";
+    }
+    
+    // Reset to first question
+    currentQuestion = 0;
+    
+    // Reset battle dialogue state
+    currentBattleDialogue = 0;
+    battleDialogueComplete = false;
+    
+    // Start the battle dialogue again
+    setTimeout(showBattleDialogue, 1000);
+}
+
+// Handle click events on the container
+document.getElementById("container").addEventListener("click", (e) => {
+    // Only proceed with initial dialogue if we're not in battle and not clicking on a move box
+    if (!battleStarted && !e.target.closest('.move-box')) {
+        if (currentDialogue < dialogues.length - 1) {
+            currentDialogue++;
+            showDialogue();
+        } else if (!battleStarted) {
+            transitionToBattle();
+        }
+    }
+});
+
+// Start the scene
+setTimeout(showDialogue, 2000);
+</script>
+</body>
+</html>
