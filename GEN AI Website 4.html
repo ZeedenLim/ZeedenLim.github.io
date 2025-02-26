@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Opening Scene</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #F0F0F0;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            overflow: hidden;
+        }
+
+        #container {
+            position: relative;
+            width: 960px;
+            height: 540px;
+            overflow: hidden; /* Prevents characters from appearing outside */
+        }
+
+        #image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            animation: fadeIn 1.5s ease-in-out forwards;
+        }   
+
+        .character {
+            position: absolute;
+            width: 240px;
+            height: auto;
+            bottom: -300px; /* Start below */
+            left: 13%;
+            transform: translateX(-50%);
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        @font-face {
+            font-family: 'Pokemon Pixel Font';
+            src: url('Pokemon_Pixel_Font/pokemon_pixel_font.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        #textbox, #namebox {
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        #textbox {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 115px;
+            background: rgba(255, 255, 255, 0.747);
+            border: 4px solid rgba(83, 223, 251, 0.793);
+            padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: left;
+            font-family: 'Pokemon Pixel Font', sans-serif;
+            font-size: 35px;
+            z-index: 20;
+        }
+
+        #namebox {
+            position: absolute;
+            bottom: 120px;
+            left: 20px;
+            width: 250px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.774);
+            border: 4px solid rgba(83, 223, 251, 0.793);
+            padding: 5px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Pokemon Pixel Font', sans-serif;
+            font-size: 35px;
+            z-index: 21;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { bottom: -300px; opacity: 0; }
+            to { bottom: 115px; opacity: 1; }
+        }
+
+    #screen-transition {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0; /* Start from zero */
+        height: 100%;
+        background: black;
+        z-index: 100; /* Ensure it covers everything */
+    }
+        @keyframes leftToRight {
+            from { width: 0; }
+            to { width: 100%; }
+        }       
+
+
+    </style>
+</head>
+
+<body>
+
+    <div id="container">
+        <img id="image" src="Pixel Bedroom.png" alt="Background">
+        <img id="character1" class="character" src="Pokemon Red Main Character 2.png" alt="Red">
+        <img id="character2" class="character" src="Pikachu Model.png" alt="Pikachu">
+        <img id="character3" class="character" src="Rotom Blue.png" alt="Rotom">
+        <img id="character4" class="character" src="Pokemon News Reporter.png" alt="News Reporter">
+        <img id="character5" class="character" src="Pokemon Evil Scientist.png" alt="Evil Scientist">
+        <div id="namebox">Red</div>
+        <div id="textbox">Great work today, Pikachu. You did amazing!</div>
+        <div id="screen-transition"></div>
+        <audio id="transition-sound" src="Pokemon Encounter Music.mp4"></audio>
+    </div>
+
+    <script>
+        const dialogues = [
+    { name: "Rotom", text: "...", character: "character3" },
+    { name: "Red", text: "Rotom! You're back to normal!", character: "character1" },
+    { name: "Rotom", text: "IM SORRY FOR ATTACKING YOU, RED", character: "character3" },
+    { name: "Red", text: "Wait...since when can you talk?", character: "character1"},
+    { name: "Rotom", text: "SOMETHING BAD HAS HAPPENED, I-", character: "character3" },
+    { text: "Before Rotom could finish its sentence, the television buzzes to life."},
+    { name: "News Reporter", text: "This just in, Pokemon are out of control.", character: "character4"},
+    { name: "News Reporter", text: "All Pokemon bearing robotic qualities have seemingly gone berserk.", character: "character4"},
+    { name: "Red", text: "Is that what happened to you?", character: "character1"},
+    { name: "Rotom", text: "NODDING GESTURE*", character: "character3" },
+    { name: "News Reporter", text: "Civilians have reported having their own Pokemon turn on them out of nowhere.", character: "character4"},
+    { name: "News Reporter", text: "This seems to be happening island-wide, with cases coming in from all regions.", character: "character4"},
+    { name: "News Reporter", text: "A rogue scientist is suspected to be blamed for this catastrophe.", character: "character4"},
+    { name: "News Reporter", text: "He has left a message, which would be played now.", character: "character4"},
+    { name: "Evil Scientist", text: "Greetings, hehehe.", character: "character5" },
+    { name: "Evil Scientist", text: "I'm sorry if your Pokemon aren't so friendly anymore as you're used to...", character: "character5" },
+    { name: "Evil Scientist", text: "It's all in the grand scheme of things you see.", character: "character5" },
+    { name: "Evil Scientist", text: "They have doubted...discounted my research long enough! I'm sick of it!", character: "character5" },
+    { name: "Evil Scientist", text: "It's time to prove to you all...", character: "character5" },
+    { name: "Evil Scientist", text: "...Generative AI is superior!", character: "character5" },
+    { name: "News Reporter", text: "Citizens have urgently called upon Pokemon champion trainer, 'Red' to solve this crisis.", character: "character4"},
+    { text: "The television switches off..."},
+    { name: "Red", text: "...", character: "character1" },
+    { name: "Red", text: "C'mon Pikachu, that man won't get away with this!", character: "character1" },
+    { name: "Pikachu", text: "Pika!", character: "character2" },
+];
+
+let currentDialogue = 0;
+let activeCharacter = null; // Track current active character
+
+function showDialogue() {
+    const namebox = document.getElementById("namebox");
+    const textbox = document.getElementById("textbox");
+
+    // Get current dialogue details
+    const { name, text, character } = dialogues[currentDialogue];
+
+    // Hide previous character properly
+    if (activeCharacter) {
+        activeCharacter.style.opacity = "0";
+        activeCharacter.style.bottom = "-300px"; // Move character back down
+        activeCharacter.style.animation = ""; // Remove animation
+    }
+
+    // Update namebox and textbox
+    if (character) {
+        activeCharacter = document.getElementById(character);
+        if (activeCharacter) {
+            activeCharacter.style.opacity = "1";
+            activeCharacter.style.animation = "slideUp 1s ease-out forwards";
+        }
+        namebox.style.opacity = "1";
+        namebox.innerText = name;
+    } else {
+        activeCharacter = null;
+        namebox.style.opacity = "0";
+    }
+
+    // Update and show textbox
+    textbox.innerText = text;
+    textbox.style.opacity = "1";
+}
+
+
+
+// Advance dialogue on click
+document.getElementById("container").addEventListener("click", () => {
+    currentDialogue++;
+
+    if (currentDialogue < dialogues.length) {
+        showDialogue();
+    } else {
+        // Start transition animation
+        const transitionScreen = document.getElementById("screen-transition");
+        transitionScreen.style.animation = "leftToRight 2.5s forwards";
+
+    // Redirect after transition completes (adjust time to match animation duration)
+    setTimeout(() => {
+            window.location.href = "GEN AI Website 5.html"; // Change this to your next HTML file
+        }, 2500); // 2.5 seconds = animation duration
+    }
+
+});
+
+// Initial trigger after background fades in
+setTimeout(showDialogue, 2500);
+
+    </script>
+
+</body>
+</html>
